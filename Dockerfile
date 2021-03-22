@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM ubuntu:focal
 
 RUN apt-get update
 RUN apt-get install -y git build-essential cmake libuv1-dev libssl-dev libhwloc-dev
