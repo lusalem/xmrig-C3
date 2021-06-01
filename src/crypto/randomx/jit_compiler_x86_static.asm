@@ -29,9 +29,11 @@ IFDEF RAX
 _RANDOMX_JITX86_STATIC SEGMENT PAGE READ EXECUTE
 
 PUBLIC randomx_prefetch_scratchpad
+PUBLIC randomx_prefetch_scratchpad_bmi2
 PUBLIC randomx_prefetch_scratchpad_end
 PUBLIC randomx_program_prologue
 PUBLIC randomx_program_prologue_first_load
+PUBLIC randomx_program_imul_rcp_store
 PUBLIC randomx_program_loop_begin
 PUBLIC randomx_program_loop_load
 PUBLIC randomx_program_loop_load_xop
@@ -69,6 +71,14 @@ randomx_prefetch_scratchpad PROC
 	prefetcht0 [rsi+rdx]
 randomx_prefetch_scratchpad ENDP
 
+randomx_prefetch_scratchpad_bmi2 PROC
+	rorx rdx, rax, 32
+	and eax, RANDOMX_SCRATCHPAD_MASK
+	prefetcht0 [rsi+rax]
+	and edx, RANDOMX_SCRATCHPAD_MASK
+	prefetcht0 [rsi+rdx]
+randomx_prefetch_scratchpad_bmi2 ENDP
+
 randomx_prefetch_scratchpad_end PROC
 randomx_prefetch_scratchpad_end ENDP
 
@@ -94,11 +104,16 @@ randomx_program_prologue_first_load PROC
 	nop
 	nop
 	nop
-	jmp randomx_program_loop_begin
+	jmp randomx_program_imul_rcp_store
 randomx_program_prologue_first_load ENDP
 
 ALIGN 64
 	include asm/program_xmm_constants.inc
+
+randomx_program_imul_rcp_store PROC
+	include asm/program_imul_rcp_store.inc
+	jmp randomx_program_loop_begin
+randomx_program_imul_rcp_store ENDP
 
 ALIGN 64
 randomx_program_loop_begin PROC

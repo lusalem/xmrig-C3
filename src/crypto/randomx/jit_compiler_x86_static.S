@@ -38,9 +38,11 @@
 #endif
 
 .global DECL(randomx_prefetch_scratchpad)
+.global DECL(randomx_prefetch_scratchpad_bmi2)
 .global DECL(randomx_prefetch_scratchpad_end)
 .global DECL(randomx_program_prologue)
 .global DECL(randomx_program_prologue_first_load)
+.global DECL(randomx_program_imul_rcp_store)
 .global DECL(randomx_program_loop_begin)
 .global DECL(randomx_program_loop_load)
 .global DECL(randomx_program_loop_load_xop)
@@ -79,6 +81,13 @@ DECL(randomx_prefetch_scratchpad):
 	and edx, RANDOMX_SCRATCHPAD_MASK
 	prefetcht0 [rsi+rdx]
 
+DECL(randomx_prefetch_scratchpad_bmi2):
+	rorx rdx, rax, 32
+	and eax, RANDOMX_SCRATCHPAD_MASK
+	prefetcht0 [rsi+rax]
+	and edx, RANDOMX_SCRATCHPAD_MASK
+	prefetcht0 [rsi+rdx]
+
 DECL(randomx_prefetch_scratchpad_end):
 
 .balign 64
@@ -106,10 +115,14 @@ DECL(randomx_program_prologue_first_load):
 	nop
 	nop
 	nop
-	jmp DECL(randomx_program_loop_begin)
+	jmp DECL(randomx_program_imul_rcp_store)
 
 .balign 64
 	#include "asm/program_xmm_constants.inc"
+
+DECL(randomx_program_imul_rcp_store):
+	#include "asm/program_imul_rcp_store.inc"
+	jmp DECL(randomx_program_loop_begin)
 
 .balign 64
 DECL(randomx_program_loop_begin):
